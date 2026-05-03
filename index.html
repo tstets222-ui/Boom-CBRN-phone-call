@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTR 炸彈/可疑物襲擊恐嚇報告表</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --mtr-blue: #003366;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --accent-blue: #007aff;
+            --record-red: #ff3b30;
+        }
+
+        * { box-sizing: border-box; font-family: "PingFang HK", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+        
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 10px;
+            padding-bottom: 100px;
+            color: #333;
+        }
+
+        #capture-area {
+            background-color: var(--bg-color);
+            padding: 10px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 10px;
+            background: var(--mtr-blue);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0;
+        }
+
+        h1 { font-size: 1.25rem; margin: 0; line-height: 1.4; }
+        .subtitle { font-size: 0.85rem; opacity: 0.9; margin-top: 5px; }
+
+        .section-card {
+            background: var(--card-bg);
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            color: var(--mtr-blue);
+            border-left: 4px solid var(--mtr-blue);
+            padding-left: 10px;
+            margin: 10px 0 15px 0;
+            font-weight: bold;
+        }
+
+        .field-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .en-label {
+            display: block;
+            font-size: 0.75rem;
+            color: #666;
+            font-weight: normal;
+            margin-bottom: 6px;
+        }
+
+        .input-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
+        .flex-1 { flex: 1; }
+
+        input[type="text"], input[type="date"], input[type="time"], input[type="number"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: #fafafa;
+        }
+
+        .mic-btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .mic-btn.recording { background: var(--record-red); animation: pulse 1s infinite; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .options-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .option-item {
+            font-size: 0.85rem;
+            background: #eee;
+            padding: 8px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-item input { margin-right: 5px; }
+
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .report-table td { padding: 8px; border: 1px solid #ddd; font-size: 0.85rem; }
+        .table-head { background: #f8f8f8; font-weight: bold; }
+
+        #sig-canvas {
+            border: 1px dashed #999;
+            width: 100%;
+            height: 120px;
+            background: #fff;
+            touch-action: none;
+        }
+
+        .btn-group {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            background: white;
+            padding: 10px;
+            gap: 10px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+        }
+
+        .btn-export { background: #34c759; }
+        .btn-submit { background: var(--mtr-blue); }
+
+        @media print { .btn-group { display: none; } }
+    </style>
+</head>
+<body>
+
+<div id="capture-area">
+    <div class="header">
+        <h1>炸彈、可疑氣體/物品襲擊恐嚇報告</h1>
+        <div class="subtitle">BOMB, UNIDENTIFIED GAS/SUBSTANCE ATTACK THREAT REPORT</div>
+    </div>
+
+    <div class="section-card">
+        <div class="input-row">
+            <div class="flex-1">
+                <label class="field-label">參考編號 Ref. No.</label>
+                <input type="text" id="ref_no">
+            </div>
+            <div class="flex-1">
+                <label class="field-label">OP1 表格編號 OP1 No.</label>
+                <input type="text" id="op1_no">
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-title">第一部份 炸彈、可疑氣體/物品襲擊恐嚇詳情<br><small>Part I Bomb, Unidentified Gas/Substance Attack Threat Details</small></div>
+        
+        <label class="field-label">恐嚇全文照錄 Exact Wording of Threat:</label>
+        <div class="input-row">
+            <textarea id="exact_wording" rows="3"></textarea>
+            <button class="mic-btn" onclick="runSpeech('exact_wording', this)">🎤</button>
+        </div>
+
+        <p style="font-size:0.85rem; font-weight:bold; color:var(--mtr-blue);">提問問題及答話 Questions to Ask / Caller's Answers:</p>
+        
+        <div id="questions-container">
+            <script>
+                const questions = [
+                    "來電者到底提出甚麼恐嚇? What exactly is the caller threatening?",
+                    "來電者已採取甚麼行動? What has the caller done?",
+                    "若不聽從指示，會有何後果? What will happen if instructions are not followed?",
+                    "若設下了時限，是何時? What is the time limit?",
+                    "炸彈/可疑物放在何處? Where is the bomb/gas/substance?",
+                    "外形像甚麼? What does it look like?",
+                    "屬哪一類型? What type is it?",
+                    "為何提出恐嚇? Why is the caller making this threat?",
+                    "從何處來電? Where is the caller calling from?",
+                    "電話號碼? Caller's telephone number?",
+                    "姓名? Caller's name?"
+                ];
+                questions.forEach((q, i) => {
+                    document.write(`
+                        <div style="margin-bottom:15px;">
+                            <label class="en-label">Q${i+1}. ${q}</label>
+                            <div class="input-row">
+                                <input type="text" id="q${i+1}">
+                                <button class="mic-btn" onclick="runSpeech('q${i+1}', this)">🎤</button>
+                            </div>
+                        </div>
+                    `);
+                });
+            </script>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-title">第二部份 來電者詳情 Part II Caller's Details</div>
+        
+        <div class="input-row">
+            <div class="flex-1">
+                <label class="field-label">來電日期 Date</label>
+                <input type="date" id="call_date">
+            </div>
+            <div class="flex-1">
+                <label class="field-label">時間 Time</label>
+                <input type="time" id="call_time">
+            </div>
+        </div>
+
+        <label class="field-label">電話來源 Source of Call</label>
+        <div class="options-group">
+            <label class="option-item"><input type="radio" name="source" value="街線 Outside"> 街線 Outside</label>
+            <label class="option-item"><input type="radio" name="source" value="內線 Extension"> 內線 Extension</label>
+            <label class="option-item"><input type="radio" name="source" value="直線 Direct"> 直線 Direct</label>
+        </div>
+
+        <div class="input-row">
+            <div class="flex-1">
+                <label class="field-label">性別 Sex</label>
+                <select id="sex" style="width:100%; padding:10px; border-radius:6px;">
+                    <option value="">請選擇</option>
+                    <option value="男 Male">男 Male</option>
+                    <option value="女 Female">女 Female</option>
+                </select>
+            </div>
+            <div class="flex-1">
+                <label class="field-label">估計年齡 Age</label>
+                <input type="number" id="est_age">
+            </div>
+        </div>
+
+        <label class="field-label">語言 Language</label>
+        <div class="options-group">
+            <label class="option-item"><input type="checkbox" name="lang" value="粵語"> 粵語</label>
+            <label class="option-item"><input type="checkbox" name="lang" value="普通話"> 普通話</label>
+            <label class="option-item"><input type="checkbox" name="lang" value="英語"> 英語</label>
+            <label class="option-item">其他: <input type="text" id="lang_other" style="width:50px;"></label>
+        </div>
+
+        <label class="field-label">說話/態度 Manner (可多選)</label>
+        <div class="options-group">
+            <script>
+                const manners = ["快 Rapid", "慢 Slow", "正常 Normal", "激動 Excited", "鎮定 Calm", "大聲 Loud", "不連貫 Rambling", "偽裝 Disguised", "憂傷 Distressed", "認真 Sincere", "醉酒 Drunk", "口音 Accent", "口吃 Stammer", "怪異 Peculiar"];
+                manners.forEach(m => {
+                    document.write(`<label class="option-item"><input type="checkbox" name="manner" value="${m}"> ${m}</label>`);
+                });
+            </script>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-title">第三部份 報告詳情 Part III Reporting Details</div>
+        <table class="report-table">
+            <tr class="table-head"><td>呈報對象</td><td>日期/時間</td></tr>
+            <tr>
+                <td>控制室總主任 (2500)</td>
+                <td><input type="date" id="r1_d"><br><input type="time" id="r1_t"></td>
+            </tr>
+            <tr>
+                <td>港鐵警處中心 (2305 7512)</td>
+                <td><input type="date" id="r2_d"><br><input type="time" id="r2_t"></td>
+            </tr>
+            <tr>
+                <td>"999" 緊急求助</td>
+                <td><input type="date" id="r3_d"><br><input type="time" id="r3_t"></td>
+            </tr>
+            <tr>
+                <td>高級車務執行人員<br><input type="text" id="r4_ch" placeholder="報告途徑"></td>
+                <td><input type="date" id="r4_d"><br><input type="time" id="r4_t"></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section-card">
+        <div class="section-title">第四部份 接受者詳情 Part IV Receiver's Details</div>
+        <div class="input-row">
+            <div class="flex-1">
+                <label class="field-label">姓名 Name</label>
+                <input type="text" id="recv_name">
+            </div>
+            <div class="flex-1">
+                <label class="field-label">員工編號 Staff No.</label>
+                <input type="text" id="recv_staff">
+            </div>
+        </div>
+        <div class="input-row">
+            <div class="flex-1">
+                <label class="field-label">職位 Position</label>
+                <input type="text" id="recv_pos">
+            </div>
+            <div class="flex-1">
+                <label class="field-label">日期 Date</label>
+                <input type="date" id="recv_date">
+            </div>
+        </div>
+        <label class="field-label">簽署 Signature</label>
+        <canvas id="sig-canvas"></canvas>
+        <button onclick="clearSig()" style="margin-top:5px; font-size:0.7rem;">清除重簽 Clear</button>
+    </div>
+</div>
+
+<div class="btn-group">
+    <button class="btn btn-export" onclick="exportImage()">生成報告圖片</button>
+    <button class="btn btn-submit" onclick="submitEmail()">提交報告 (Email)</button>
+</div>
+
+<script>
+    // 語音輸入邏輯
+    function runSpeech(targetId, btn) {
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'zh-HK';
+        recognition.onstart = () => btn.classList.add('recording');
+        recognition.onend = () => btn.classList.remove('recording');
+        recognition.onresult = (event) => {
+            document.getElementById(targetId).value += event.results[0][0].transcript;
+        };
+        recognition.start();
+    }
+
+    // 簽名功能
+    const canvas = document.getElementById('sig-canvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
+    canvas.addEventListener('touchstart', (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); e.preventDefault(); });
+    canvas.addEventListener('touchmove', (e) => { if(!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); });
+    canvas.addEventListener('touchend', () => drawing = false);
+    // 滑鼠支援
+    canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('mousemove', (e) => { if(drawing) { const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); } });
+    canvas.addEventListener('mouseup', () => drawing = false);
+
+    function clearSig() { ctx.clearRect(0,0,canvas.width,canvas.height); }
+
+    // 導出圖片
+    function exportImage() {
+        // 隱藏按鈕區進行截圖
+        document.querySelector('.btn-group').style.display = 'none';
+        html2canvas(document.querySelector("#capture-area")).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `Threat_Report_${new Date().getTime()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            document.querySelector('.btn-group').style.display = 'flex';
+            alert("報告圖片已生成並嘗試下載。");
+        });
+    }
+
+    // Email 提交
+    function submitEmail() {
+        const ref = document.getElementById('ref_no').value;
+        const name = document.getElementById('recv_name').value;
+        const wording = document.getElementById('exact_wording').value;
+
+        let body = `炸彈、可疑氣體/物品襲擊恐嚇報告\n`;
+        body += `------------------------------------\n`;
+        body += `參考編號: ${ref}\n`;
+        body += `接受者姓名: ${name}\n`;
+        body += `恐嚇全文: ${wording}\n\n`;
+        body += `[請注意: 詳細數據及簽署請查看隨附的報告圖片]\n`;
+        body += `------------------------------------\n`;
+        body += `(此電郵由行動終端自動彙整生成)`;
+
+        const mailtoUrl = `mailto:tst@mtr.com.hk?subject=【恐嚇報告】Ref:${ref}_${name}&body=${encodeURIComponent(body)}`;
+        
+        window.location.href = mailtoUrl;
+    }
+</script>
+
+</body>
+</html>
